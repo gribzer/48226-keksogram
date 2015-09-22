@@ -39,7 +39,6 @@
     }  
   }
 
-    
   prevButton.onclick = function(evt) {
     evt.preventDefault();
 
@@ -52,6 +51,7 @@
   resizeForm.onsubmit = function(evt) {
     evt.preventDefault();
     filterForm.elements['filter-image-src'] = previewImage.src;
+    
 
     resizeForm.classList.add('invisible');
     filterForm.classList.remove('invisible');
