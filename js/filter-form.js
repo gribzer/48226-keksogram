@@ -21,6 +21,15 @@
     previewImage.className = 'filter-image-preview' + ' ' + filterMap[selectedFilter.value];
   };
 
+  window.onload = function(evt) {
+    for (var i = 0, l = selectedFilter.length; i < l; i++) {
+        if (selectedFilter[i].value == document.cookie.split('=')[1]) {
+          selectedFilter[i].checked = true;
+        }
+    }
+    setFilter();
+  }
+    
   for (var i = 0, l = selectedFilter.length; i < l; i++) {
     selectedFilter[i].onchange = function(evt) {
       setFilter();
@@ -34,10 +43,17 @@
     filterForm.classList.add('invisible');
     resizeForm.classList.remove('invisible');
   };
-
-  filterForm.onsubmit = function() {
+  
+  filterForm.onsubmit = function(evt) {
     evt.preventDefault();
-
+        
+    var birthday = new Date() - new Date('April 26, 1995');
+    var date = new Date(new Date().getTime() + birthday);
+    for (var i = 0, l = selectedFilter.length; i < l; i++) {
+        if (selectedFilter[i].checked) {
+            document.cookie = "name=" + selectedFilter[i].value + "; expires=" + date.toUTCString();
+        }
+    }
     uploadForm.classList.remove('invisible');
     filterForm.classList.add('invisible');
   }
