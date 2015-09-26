@@ -8,10 +8,12 @@
   var resizeX = resizeForm['resize-x'];
   var resizeY = resizeForm['resize-y'];
   var resizeSize = resizeForm['resize-size'];
+
+  var MINIMAL_SIDE_VALUE = 50;
     
   resizeX.min = 0;
   resizeY.min = 0;
-  resizeSize.min = 1;
+  resizeSize.min = MINIMAL_SIDE_VALUE;
   
   resizeX.required = true;
   resizeY.required = true;
