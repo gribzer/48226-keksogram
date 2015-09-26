@@ -8,10 +8,12 @@
   var resizeX = resizeForm['resize-x'];
   var resizeY = resizeForm['resize-y'];
   var resizeSize = resizeForm['resize-size'];
+
+  var MINIMAL_SIDE_VALUE = 50;
     
   resizeX.min = 0;
   resizeY.min = 0;
-  resizeSize.min = 1;
+  resizeSize.min = MINIMAL_SIDE_VALUE;
   
   resizeX.required = true;
   resizeY.required = true;
@@ -22,21 +24,14 @@
     var imageHeight = previewImage.clientHeight;
     var imageMinimalSide = Math.min(imageWidth, imageHeight);
     
-    if (imageMinimalSide == imageWidth) {
-      resizeX.max = imageMinimalSide - 1;
-      resizeY.max = resizeX.max;
-      resizeSize.max = imageMinimalSide - parseInt(resizeX.value, 10);
-      resizeX.onchange = function(evt) {
-          resizeSize.max = imageMinimalSide - parseInt(resizeX.value, 10);
-      }
-    } else {
-      resizeY.max = imageMinimalSide - 1;
-      resizeX.max = resizeY.max;
-      resizeSize.max = imageMinimalSide - parseInt(resizeX.value, 10);
-      resizeY.onchange = function(evt) {
-          resizeSize.max = imageMinimalSide - parseInt(resizeY.value, 10);
-      }
-    }  
+	resizeX.max = imageMinimalSide - 1;
+	resizeY.max = resizeX.max;
+	resizeSize.max = imageMinimalSide - parseInt(resizeX.value, 10);
+
+	var elementToListen = imageMinimalSide == imageWidth ? resizeX : resizeY;
+	elementToListen.onchange = function(evt) {
+	  resizeSize.max = imageMinimalSide - parseInt(elementToListen.value, 10);
+	}
   }
 
   prevButton.onclick = function(evt) {
