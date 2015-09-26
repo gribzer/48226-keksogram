@@ -22,11 +22,7 @@
   };
 
   window.onload = function(evt) {
-    for (var i = 0, l = selectedFilter.length; i < l; i++) {
-        if (selectedFilter[i].value == document.cookie.split('=')[1]) {
-          selectedFilter[i].checked = true;
-        }
-    }
+    selectedFilter.value = document.cookie.split('=')[1];
     setFilter();
   }
     
@@ -49,11 +45,7 @@
         
     var birthday = new Date() - new Date('April 26, 1995');
     var date = new Date(new Date().getTime() + birthday);
-    for (var i = 0, l = selectedFilter.length; i < l; i++) {
-        if (selectedFilter[i].checked) {
-            document.cookie = "name=" + selectedFilter[i].value + "; expires=" + date.toUTCString();
-        }
-    }
+    document.cookie = "name=" + selectedFilter.value + "; expires=" + date.toUTCString();
     uploadForm.classList.remove('invisible');
     filterForm.classList.add('invisible');
   }
