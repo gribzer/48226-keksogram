@@ -81,7 +81,7 @@
               callback(JSON.parse(data));
             }
                 
-            if (xhr.status == 400) {
+            if (xhr.status >= 400) {
               showDataFailure();
             }
             break;
@@ -112,20 +112,11 @@
             break;
           case 'discussed':
             filteredPictures = filteredPictures.sort(function(a, b) {
-              if (a.comments < b.comments) {
-                return 1;
-              }
-              if (a.comments > b.comments) {
-                return -1;
-              }
-              if (a.comments === b.comments) {
-                return 0;
-              }
+              return b.comments - a.comments;
             });
             break;
 
           default:
-            filteredPictures = pictures.slice(0);
             break;
       }
     
