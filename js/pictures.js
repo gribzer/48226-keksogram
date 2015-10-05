@@ -2,6 +2,9 @@
     var filtersForm = document.querySelector('.filters');
     var picturesContainer = document.querySelector('.pictures');
     
+    var REQUEST_FAILURE_TIMEOUT = 10000;
+    var PAGE_SIZE = 12;
+    
     var ReadyState = {
         'UNSENT' : 0,
         'OPENED' : 1,
@@ -20,7 +23,7 @@
     
     //Формирование изображений на странице по шаблону
     function createPictures(pictures) {
-      var picturesTemplate = document.getElementById('picture-template');
+      var picturesTemplate = document.querySelector('.picture-template');
       var picturesFragment = document.createDocumentFragment();   
       
       picturesContainer.innerHTML = '';
@@ -60,7 +63,7 @@
     //Загрузка изображений на сервер
     function loadPictures(callback) {
       var xhr = new XMLHttpRequest();
-      xhr.timeout = 10000;
+      xhr.timeout = REQUEST_FAILURE_TIMEOUT;
       xhr.open('get', 'data/pictures.json');
       xhr.send();
         
