@@ -145,7 +145,7 @@
       currentPage = 0;
       currentPictures = filterPictures(pictures, filterValue);
       createPictures(currentPictures, currentPage, true);
-      isCanLoadMorePages();
+      loadMorePages();
     }
     
     //Проверка на возможность загрузки следующей страницы
@@ -176,7 +176,7 @@
     //Можно ли загрузить страницы при изменении размера окна
     function initWindowResize() {
       window.addEventListener('resize', function() {
-        isCanLoadMorePages()
+        loadMorePages()
       });
     }
     
