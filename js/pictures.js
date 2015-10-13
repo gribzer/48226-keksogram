@@ -5,6 +5,9 @@
     var REQUEST_FAILURE_TIMEOUT = 10000;
     var PAGE_SIZE = 12;
     
+    var currentPage;
+    var currentPictures;
+    
     var ReadyState = {
         'UNSENT' : 0,
         'OPENED' : 1,
@@ -22,11 +25,21 @@
     }
     
     //Формирование изображений на странице по шаблону
-    function createPictures(pictures) {
+    function createPictures(pictures, pageNumber, replace) {
+      replace = typeof replace !== 'underfined' ? replace : true;
+      pageNumber = pageNumber || 0;
+        
+      if (replace) {
+        picturesContainer.classList.remove('pictures-failure');
+        picturesContainer.innerHTML = '';
+      }
+        
       var picturesTemplate = document.querySelector('.picture-template');
       var picturesFragment = document.createDocumentFragment();   
       
-      picturesContainer.innerHTML = '';
+      var picturesFrom = pageNumber * PAGE_SIZE;
+      var picturesTo = picturesFrom + PAGE_SIZE;
+      pictures = pictures.slice(picturesFrom, picturesTo);
         
       pictures.forEach(function(picture) {
         var newPictureElement = picturesTemplate.content.children[0].cloneNode(true);
@@ -122,30 +135,78 @@
           default:
             break;
       }
-    
+      
+      localStorage.setItem('filterValue', filterValue);
       return filteredPictures;
     }
     
     //Обработка активного фильтра
     function setActiveFilter(filterValue) {
-        var filteredPictures = filterPictures(pictures, filterValue);
-        createPictures(filteredPictures);
+      currentPage = 0;
+      currentPictures = filterPictures(pictures, filterValue);
+      createPictures(currentPictures, currentPage, true);
+      isCanLoadMorePages();
     }
     
-    //Инициализация фильтров
-    function initFilters() {
-      var filterElements = filtersForm['filter'];
-      for (var i = 0, l = filterElements.length; i < l; i++) {
-        filterElements[i].onchange = function(evt) {
-          var clickedFilter = evt.currentTarget;
-          setActiveFilter(clickedFilter.value);
-        }
+    //Проверка на возможность загрузки следующей страницы
+    function checkNextPage() {
+      if (isAtTheBottom() && isNextPageAvailable()) {
+        window.dispatchEvent(new CustomEvent('loadneeded'));
+      } 
+    }
+    
+    //Проверка на доступность следующей страницы
+    function isNextPageAvailable() {
+      return currentPage < Math.ceil(pictures.length / PAGE_SIZE);
+    }
+    
+    //Проверка нахождения внизу страницы
+    function isAtTheBottom() {
+      var paddingBottom = 100;
+      return picturesContainer.getBoundingClientRect().bottom - paddingBottom <= window.innerHeight;
+    }
+    
+    //Можно ли загрузить еще страницы при первой загрузке
+    function loadMorePages() {
+      if (!(document.body.offsetHeight == document.body.scrollHeight) && isNextPageAvailable()) {
+        createPictures(currentPictures, currentPage++, false);
       }
     }
     
+    //Можно ли загрузить страницы при изменении размера окна
+    function initWindowResize() {
+      window.addEventListener('resize', function() {
+        isCanLoadMorePages()
+      });
+    }
+    
+    //Подгрузка новых изображение при прокрутке страницы
+    function initScroll() {
+      var someTimeout;
+      window.addEventListener('scroll', function() {
+        clearTimeout(someTimeout);
+        someTimeout = setTimeout(checkNextPage, 100);
+      });
+        
+      window.addEventListener('loadneeded', function() {
+        createPictures(currentPictures, currentPage++, false);
+      });
+    }
+    
+    //Инициализация фильтров
+    function initFilters() {      
+      filtersForm.addEventListener('click', function(evt) {
+        var clickedFilter = evt.target;
+        setActiveFilter(clickedFilter.value);
+      });
+    }
+    
     initFilters();
+    initScroll();
+    initWindowResize();
+        
     loadPictures(function(loadedPictures) {
       pictures = loadedPictures;
-      setActiveFilter('popular');
+      setActiveFilter(localStorage.getItem('filterValue') || 'popular');
     });
 })();
