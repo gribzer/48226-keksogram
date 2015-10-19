@@ -166,14 +166,14 @@
       return picturesContainer.getBoundingClientRect().bottom - paddingBottom <= window.innerHeight;
     }
     
-    //Можно ли загрузить еще страницы при первой загрузке
+    //Проверка на возможность загрузить дополнительные страницы при первой загрузке
     function loadMorePages() {
       if (!(document.body.offsetHeight == document.body.scrollHeight) && isNextPageAvailable()) {
         createPictures(currentPictures, currentPage++, false);
       }
     }
     
-    //Можно ли загрузить страницы при изменении размера окна
+    //Проверка на возможность загрузить страницы при изменении размера окна
     function initWindowResize() {
       window.addEventListener('resize', function() {
         loadMorePages()
@@ -207,6 +207,8 @@
         
     loadPictures(function(loadedPictures) {
       pictures = loadedPictures;
-      setActiveFilter(localStorage.getItem('filterValue') || 'popular');
+      var activeFilter = localStorage.getItem('filterValue') || 'popular';
+      setActiveFilter(activeFilter);
+      document.getElementById('filter-' + activeFilter).setAttribute('checked', 'checked');
     });
 })();
