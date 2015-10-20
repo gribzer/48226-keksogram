@@ -2,6 +2,12 @@
     var filtersForm = document.querySelector('.filters');
     var picturesContainer = document.querySelector('.pictures');
     
+    var REQUEST_FAILURE_TIMEOUT = 10000;
+    var PAGE_SIZE = 12;
+    
+    var currentPage;
+    var currentPictures;
+    
     var ReadyState = {
         'UNSENT' : 0,
         'OPENED' : 1,
@@ -19,11 +25,21 @@
     }
     
     //Формирование изображений на странице по шаблону
-    function createPictures(pictures) {
-      var picturesTemplate = document.getElementById('picture-template');
+    function createPictures(pictures, pageNumber, replace) {
+      replace = typeof replace !== 'underfined' ? replace : true;
+      pageNumber = pageNumber || 0;
+        
+      if (replace) {
+        picturesContainer.classList.remove('pictures-failure');
+        picturesContainer.innerHTML = '';
+      }
+        
+      var picturesTemplate = document.querySelector('.picture-template');
       var picturesFragment = document.createDocumentFragment();   
       
-      picturesContainer.innerHTML = '';
+      var picturesFrom = pageNumber * PAGE_SIZE;
+      var picturesTo = picturesFrom + PAGE_SIZE;
+      pictures = pictures.slice(picturesFrom, picturesTo);
         
       pictures.forEach(function(picture) {
         var newPictureElement = picturesTemplate.content.children[0].cloneNode(true);
@@ -60,7 +76,7 @@
     //Загрузка изображений на сервер
     function loadPictures(callback) {
       var xhr = new XMLHttpRequest();
-      xhr.timeout = 10000;
+      xhr.timeout = REQUEST_FAILURE_TIMEOUT;
       xhr.open('get', 'data/pictures.json');
       xhr.send();
         
@@ -81,7 +97,7 @@
               callback(JSON.parse(data));
             }
                 
-            if (xhr.status == 400) {
+            if (xhr.status >= 400) {
               showDataFailure();
             }
             break;
@@ -112,46 +128,87 @@
             break;
           case 'discussed':
             filteredPictures = filteredPictures.sort(function(a, b) {
-              if (a.comments < b.comments) {
-                return 1;
-              }
-              if (a.comments > b.comments) {
-                return -1;
-              }
-              if (a.comments === b.comments) {
-                return 0;
-              }
+              return b.comments - a.comments;
             });
             break;
 
           default:
-            filteredPictures = pictures.slice(0);
             break;
       }
-    
+      
+      localStorage.setItem('filterValue', filterValue);
       return filteredPictures;
     }
     
     //Обработка активного фильтра
     function setActiveFilter(filterValue) {
-        var filteredPictures = filterPictures(pictures, filterValue);
-        createPictures(filteredPictures);
+      currentPage = 0;
+      currentPictures = filterPictures(pictures, filterValue);
+      createPictures(currentPictures, currentPage, true);
+      loadMorePages();
     }
     
-    //Инициализация фильтров
-    function initFilters() {
-      var filterElements = filtersForm['filter'];
-      for (var i = 0, l = filterElements.length; i < l; i++) {
-        filterElements[i].onchange = function(evt) {
-          var clickedFilter = evt.currentTarget;
-          setActiveFilter(clickedFilter.value);
-        }
+    //Проверка на возможность загрузки следующей страницы
+    function checkNextPage() {
+      if (isAtTheBottom() && isNextPageAvailable()) {
+        window.dispatchEvent(new CustomEvent('loadneeded'));
+      } 
+    }
+    
+    //Проверка на доступность следующей страницы
+    function isNextPageAvailable() {
+      return currentPage < Math.ceil(pictures.length / PAGE_SIZE);
+    }
+    
+    //Проверка нахождения внизу страницы
+    function isAtTheBottom() {
+      var paddingBottom = 100;
+      return picturesContainer.getBoundingClientRect().bottom - paddingBottom <= window.innerHeight;
+    }
+    
+    //Проверка на возможность загрузить дополнительные страницы при первой загрузке
+    function loadMorePages() {
+      if (!(document.body.offsetHeight == document.body.scrollHeight) && isNextPageAvailable()) {
+        createPictures(currentPictures, currentPage++, false);
       }
     }
     
+    //Проверка на возможность загрузить страницы при изменении размера окна
+    function initWindowResize() {
+      window.addEventListener('resize', function() {
+        loadMorePages()
+      });
+    }
+    
+    //Подгрузка новых изображение при прокрутке страницы
+    function initScroll() {
+      var someTimeout;
+      window.addEventListener('scroll', function() {
+        clearTimeout(someTimeout);
+        someTimeout = setTimeout(checkNextPage, 100);
+      });
+        
+      window.addEventListener('loadneeded', function() {
+        createPictures(currentPictures, currentPage++, false);
+      });
+    }
+    
+    //Инициализация фильтров
+    function initFilters() {      
+      filtersForm.addEventListener('click', function(evt) {
+        var clickedFilter = evt.target;
+        setActiveFilter(clickedFilter.value);
+      });
+    }
+    
     initFilters();
+    initScroll();
+    initWindowResize();
+        
     loadPictures(function(loadedPictures) {
       pictures = loadedPictures;
-      setActiveFilter('popular');
+      var activeFilter = localStorage.getItem('filterValue') || 'popular';
+      setActiveFilter(activeFilter);
+      document.getElementById('filter-' + activeFilter).setAttribute('checked', 'checked');
     });
 })();
