@@ -1,3 +1,5 @@
+'use strict';
+
 (function() {
   var uploadForm = document.forms['upload-select-image'];
   var resizeForm = document.forms['upload-resize'];
@@ -19,17 +21,17 @@
     }
 
     previewImage.className = 'filter-image-preview' + ' ' + filterMap[selectedFilter.value];
-  };
+  }
 
-  window.onload = function(evt) {
+  window.onload = function() {
     selectedFilter.value = document.cookie.split('=')[1];
     setFilter();
-  }
-    
+  };
+
   for (var i = 0, l = selectedFilter.length; i < l; i++) {
-    selectedFilter[i].onchange = function(evt) {
+    selectedFilter[i].onchange = function() {
       setFilter();
-    }
+    };
   }
 
   prevButton.onclick = function(evt) {
@@ -39,16 +41,16 @@
     filterForm.classList.add('invisible');
     resizeForm.classList.remove('invisible');
   };
-  
+
   filterForm.onsubmit = function(evt) {
     evt.preventDefault();
-        
+
     var birthday = new Date() - new Date('April 26, 1995');
     var date = new Date(new Date().getTime() + birthday);
-    document.cookie = "name=" + selectedFilter.value + "; expires=" + date.toUTCString();
+    document.cookie = 'name=' + selectedFilter.value + '; expires=' + date.toUTCString();
     uploadForm.classList.remove('invisible');
     filterForm.classList.add('invisible');
-  }
+  };
 
   setFilter();
 })();

@@ -17,23 +17,23 @@
         return !element.classList.contains('picture-load-failure');
       }
       element = element.parentElement;
-        
-    } while (element);
-      
+    }
+    while (element);
+
     return false;
   }
-    
+
   function hideGallery() {
     galleryElement.classList.add('invisible');
     closeButton.removeEventListener('click', closeHandler);
     document.body.removeEventListener('keyup', keyHandler);
   }
-    
+
   function closeHandler(evt) {
     evt.preventDefault();
     hideGallery();
   }
-    
+
   function keyHandler(evt) {
     switch (evt.keyCode) {
       case Key.LEFT:
@@ -46,19 +46,19 @@
         break;
     }
   }
-    
+
   function showGallery() {
     galleryElement.classList.remove('invisible');
     closeButton.addEventListener('click', closeHandler);
     document.body.addEventListener('keyup', keyHandler);
   }
-    
+
   picturesContainer.addEventListener('click', function(evt) {
     evt.preventDefault();
-      
+
     if (doesHaveParent(evt.target, 'picture')) {
       showGallery();
     }
   });
-    
+
 })();
