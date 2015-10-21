@@ -33,11 +33,11 @@
         var oldImageNode = oldImage.parentNode;
         oldImageNode.replaceChild(newImage, oldImage);
         clearTimeout(imageLoadTimeout);
-      }
+      };
 
       newImage.onerror = function() {
         newPictureElement.classList.add('picture-load-failure');
-      }
+      };
 
       this._element = newPictureElement;
       this._element.addEventListener('click', this._onClick);
