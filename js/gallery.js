@@ -49,7 +49,7 @@
   };
 
   Gallery.prototype._onPhotoClick = function() {
-    this.setCurrentPhoto(this._currentPhotoIndex + 1);
+    this.setCurrentPhoto(this._currentPhoto + 1);
   };
 
   Gallery.prototype.setCurrentPhoto = function(index) {
@@ -78,7 +78,9 @@
         this._pictureElement.appendChild(imageElement);
       }
     }.bind(this);
-
+    imageElement.onerror = function() {
+      this.setCurrentPhoto(this._currentPhoto + 1);
+    }.bind(this);
   };
 
   Gallery.prototype._onDocumentKeyDown = function(evt) {
