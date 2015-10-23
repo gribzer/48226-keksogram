@@ -52,12 +52,12 @@
 
   Photo.prototype._onClick = function() {
     if (!this._element.classList.contains('picture-load-failure')) {
-      var galleryClick = new CustomEvent('galleryclick', {detail: {pictureElement: this}});
+      var galleryClick = new CustomEvent('galleryclick', {detail: {photoUrl: this.getPhotoUrl()}});
       window.dispatchEvent(galleryClick);
     }
   };
 
-  Photo.prototype.getCurrentPhoto = function() {
+  Photo.prototype.getPhotoUrl = function() {
     return this._data.url;
   };
 
