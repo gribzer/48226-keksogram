@@ -131,7 +131,7 @@
     currentPictures = filterPictures(pictures, filterValue);
     renderPictures(currentPictures, currentPage, true);
 
-    var pictureUrls = pictures.map(function(photo) {
+    var pictureUrls = currentPictures.map(function(photo) {
       return photo.url;
     });
 
