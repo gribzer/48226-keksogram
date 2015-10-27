@@ -1,4 +1,4 @@
-/*global Photo: true*/
+/*global Photo: true Gallery: true*/
 
 'use strict';
 
@@ -9,8 +9,10 @@
   var REQUEST_FAILURE_TIMEOUT = 10000;
   var PAGE_SIZE = 12;
   var pictures;
+  var gallery;
   var currentPage;
   var currentPictures;
+  var renderedPictures = [];
 
   var ReadyState = {
     'UNSENT': 0,
@@ -29,7 +31,7 @@
   }
 
   //Формирование изображений на странице по шаблону
-  function createPictures(picturesData, pageNumber, replace) {
+  function renderPictures(picturesData, pageNumber, replace) {
     replace = typeof replace !== 'undefined' ? replace : true;
     pageNumber = pageNumber || 0;
 
@@ -47,6 +49,7 @@
     picturesData.forEach(function(pictureData) {
       var newPictureElement = new Photo(pictureData);
       newPictureElement.render(picturesFragment);
+      renderedPictures.push(newPictureElement);
     });
 
     picturesContainer.appendChild(picturesFragment);
@@ -126,7 +129,13 @@
   function setActiveFilter(filterValue) {
     currentPage = 0;
     currentPictures = filterPictures(pictures, filterValue);
-    createPictures(currentPictures, currentPage, true);
+    renderPictures(currentPictures, currentPage, true);
+
+    var pictureUrls = currentPictures.map(function(photo) {
+      return photo.url;
+    });
+
+    gallery.setPhotos(pictureUrls);
     loadMorePages();
   }
 
@@ -151,7 +160,7 @@
   //Проверка на возможность загрузить дополнительные страницы при первой загрузке
   function loadMorePages() {
     if (!(document.body.offsetHeight === document.body.scrollHeight) && isNextPageAvailable()) {
-      createPictures(currentPictures, currentPage++, false);
+      renderPictures(currentPictures, currentPage++, false);
     }
   }
 
@@ -171,7 +180,7 @@
     });
 
     window.addEventListener('loadneeded', function() {
-      createPictures(currentPictures, currentPage++, false);
+      renderPictures(currentPictures, currentPage++, false);
     });
   }
 
@@ -183,14 +192,29 @@
     });
   }
 
+  //Инициалицация галереи
+  function initGallery() {
+    if (!gallery) {
+      gallery = new Gallery();
+      window.addEventListener('galleryclick', function(evt) {
+        gallery.setCurrentPhotoByUrl(evt.detail.photoUrl);
+        gallery.show();
+      });
+    }
+  }
+
   initFilters();
   initScroll();
+  initGallery();
   initWindowResize();
 
   loadPictures(function(loadedPictures) {
     pictures = loadedPictures;
     var activeFilter = localStorage.getItem('filterValue') || 'popular';
+    var currentFilter = document.getElementById('filter-' + activeFilter);
     setActiveFilter(activeFilter);
-    document.getElementById('filter-' + activeFilter).setAttribute('checked', 'checked');
+    if (currentFilter !== null) {
+      currentFilter.setAttribute('checked', 'checked');
+    }
   });
 })();
