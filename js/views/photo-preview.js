@@ -10,6 +10,7 @@
    */
   var GalleryPicture = Backbone.View.extend({
     tagName: 'img',
+    className: 'gallery-overlay-image',
 
     initialize: function() {
       this._onClick = this._onClick.bind(this);
@@ -20,16 +21,21 @@
      * @override
      */
     render: function() {
-      this.el.querySelector('img').src = this.model.get('url');
-      this.el.querySelector('.likes-count').innerText = this.model.get('likes');
-      this.el.querySelector('.comments-count').innerText = this.model.get('comments');
+      this.el.src = this.model.get('url');
+      this.controlsRender();
+    },
+
+    controlsRender: function() {
+      document.querySelector('.likes-count').innerText = this.model.get('likes');
+      document.querySelector('.comments-count').innerText = this.model.get('comments');
     },
 
     /**
      * Добавление и удаление лайка при клике на фото галереи
      * @override
      */
-    likeSwitcher: function() {
+    likeSwitcher: function(evt) {
+      evt.stopPropagation()
       if (this.model.get('liked')) {
         this.model.dislike();
       } else {

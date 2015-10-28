@@ -103,8 +103,8 @@
 
       view.on('galleryclick', function() {
         gallery.setPhotos(photosCollection);
-        gallery.setCurrentPhoto(0);
         gallery.show();
+        gallery.setCurrentPhoto(0);
       });
     });
 

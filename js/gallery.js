@@ -40,7 +40,7 @@
     this._closeButton = this._element.querySelector('.gallery-overlay-close');
     this._pictureElement = this._element.querySelector('.gallery-overlay-preview');
 
-    this._currentPhoto = 0;
+    this._currentPhoto = -1;
 
     this._onCloseClick = this._onCloseClick.bind(this);
     this._onPhotoClick = this._onPhotoClick.bind(this);
@@ -52,11 +52,7 @@
    * @param  {Collection} photos
    */
   Gallery.prototype.setPhotos = function(photos) {
-    this._photos.reset(photos.map(function(photoSrc) {
-      return new Backbone.Model({
-        url: photoSrc
-      });
-    }));
+    this._photos = photos;
   };
 
   /**
@@ -65,11 +61,10 @@
    * @private
    */
   Gallery.prototype._showCurrentPhoto = function() {
-    this._pictureElement.innerHTML = '';
-
-    var imageElement = new GalleryPicture({ model: this._photos.at(this._currentPhoto) });
-    imageElement.render();
-    this._pictureElement.appendChild(imageElement.el);
+    var galleryElement = new GalleryPicture({model: this._photos.at(this._currentPhoto)});
+    galleryElement.render();
+    var currentPicture = this._pictureElement.querySelector('img');
+    currentPicture.parentNode.replaceChild(galleryElement.el, currentPicture);
   };
 
   /**
@@ -105,8 +100,9 @@
    * Прячет галерею и убирает обработчик закрытия галереи
    */
   Gallery.prototype.hide = function() {
-    this._galleryElement.classList.add('invisible');
+    this._element.classList.add('invisible');
     this._closeButton.removeEventListener('click', this._onCloseClick);
+    this._pictureElement.removeEventListener('click', this._onPhotoClick);
     document.body.removeEventListener('keydown', this._onDocumentKeyDown);
   };
 
