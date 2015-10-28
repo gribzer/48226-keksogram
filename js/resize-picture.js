@@ -18,8 +18,8 @@
     this._image.onload = function() {
       // Размер холста равен размеру загруженного изображения. Это нужно
       // для удобства работы с координатами.
-      this._container.width = this._image.naturalWidth;
-      this._container.height = this._image.naturalHeight;
+      this._container.width = 582;
+      this._container.height = 507;
 
       /**
        * Предлагаемый размер кадра в виде коэффициента относительно меньшей
@@ -98,7 +98,10 @@
 
       // Отрисовка прямоугольника, обозначающего область изображения после
       // кадрирования. Координаты задаются от центра.
-      //
+      this._ctx.strokeStyle = '#FFE753';
+      this._ctx.lineWidth = 6;
+      this._ctx.setLineDash([15, 10]);
+      this._ctx.strokeRect(-this._resizeConstraint.side / 2, -this._resizeConstraint.side / 2, this._resizeConstraint.side, this._resizeConstraint.side);
 
       // Восстановление состояния канваса, которое было до вызова ctx.save
       // и последующего изменения системы координат. Нужно для того, чтобы

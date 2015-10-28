@@ -1,105 +1,122 @@
-/*global Photo: true Gallery: true*/
+/* global
+     Gallery: true
+     PhotosCollection: true
+     PhotoView: true
+*/
 
 'use strict';
 
 (function() {
   var filtersForm = document.querySelector('.filters');
-  var picturesContainer = document.querySelector('.pictures');
 
+  /**
+   * Контейнер для фотографий
+   * @type {Element}
+   */
+  var photosContainer = document.querySelector('.pictures');
+
+  /**
+   * @const
+   * @type {number}
+   */
   var REQUEST_FAILURE_TIMEOUT = 10000;
+
+  /**
+   * @const
+   * @type {number}
+   */
   var PAGE_SIZE = 12;
-  var pictures;
-  var gallery;
-  var currentPage;
-  var currentPictures;
-  var renderedPictures = [];
 
-  var ReadyState = {
-    'UNSENT': 0,
-    'OPENED': 1,
-    'HEADERS_RECIEVED': 2,
-    'LOADING': 3,
-    'DONE': 4
-  };
+  /**
+   * Объект типа коллекция фотографий
+   * @type {PhotosCollection}
+   */
+  var photosCollection = new PhotosCollection();
 
-  //Скрытие блока с фильтрами
+  /**
+   * Объект типа фотогалерея.
+   * @type {Gallery}
+   */
+  var gallery = new Gallery();
+
+  /**
+   * @type {number}
+   */
+  var currentPage = 0;
+
+  /**
+   * @type {Array.<Object>}
+   */
+  var initiallyLoaded = [];
+
+  /**
+   * @type {Array.<HotelView>}
+   */
+  var renderedViews = [];
+
+  /**
+   * Скрытие блока с фильтрами
+   */
   filtersForm.classList.add('hidden');
 
-  //Данные отображаемые при ошибке
+  /**
+   * Добавляет класс ошибки, если ошибка загрузки фотографии
+   */
   function showDataFailure() {
-    picturesContainer.classList.add('pictures-failure');
+    photosContainer.classList.add('pictures-failure');
   }
 
-  //Формирование изображений на странице по шаблону
-  function renderPictures(picturesData, pageNumber, replace) {
+  /**
+   * Выводит фотографии постранично
+   * @param  {number} pageNumber
+   * @param  {boolean} replace
+   */
+  function renderPictures(pageNumber, replace) {
     replace = typeof replace !== 'undefined' ? replace : true;
     pageNumber = pageNumber || 0;
 
     if (replace) {
-      picturesContainer.classList.remove('pictures-failure');
-      picturesContainer.innerHTML = '';
+      while (renderedViews.length) {
+        var viewToRemove = renderedViews.shift();
+
+        photosContainer.removeChild(viewToRemove.el);
+        photosContainer.classList.remove('pictures-failure');
+        viewToRemove.off('galleryclick');
+        viewToRemove.remove();
+      }
     }
 
-    var picturesFragment = document.createDocumentFragment();
+    var photosFragment = document.createDocumentFragment();
 
-    var picturesFrom = pageNumber * PAGE_SIZE;
-    var picturesTo = picturesFrom + PAGE_SIZE;
-    picturesData = picturesData.slice(picturesFrom, picturesTo);
+    var photosFrom = pageNumber * PAGE_SIZE;
+    var photosTo = photosFrom + PAGE_SIZE;
+    var photosTemplate = document.getElementById('picture-template');
 
-    picturesData.forEach(function(pictureData) {
-      var newPictureElement = new Photo(pictureData);
-      newPictureElement.render(picturesFragment);
-      renderedPictures.push(newPictureElement);
+    photosCollection.slice(photosFrom, photosTo).forEach(function(model) {
+      var view = new PhotoView({
+        model: model,
+        el: photosTemplate.content.children[0].cloneNode(true)
+      });
+      view.render();
+      photosFragment.appendChild(view.el);
+      renderedViews.push(view);
+
+      view.on('galleryclick', function() {
+        gallery.setPhotos(photosCollection);
+        gallery.setCurrentPhoto(0);
+        gallery.show();
+      });
     });
 
-    picturesContainer.appendChild(picturesFragment);
-  }
-
-  //Отображение блока с фильтрами
-  filtersForm.classList.remove('hidden');
-
-  //Загрузка изображений на сервер
-  function loadPictures(callback) {
-    var xhr = new XMLHttpRequest();
-    xhr.timeout = REQUEST_FAILURE_TIMEOUT;
-    xhr.open('get', 'data/pictures.json');
-    xhr.send();
-
-    xhr.onreadystatechange = function(evt) {
-      var loadedXhr = evt.target;
-
-      switch (loadedXhr.readyState) {
-        case ReadyState.OPENED:
-        case ReadyState.HEADERS_RECIEVED:
-        case ReadyState.LOADING:
-          picturesContainer.classList.add('pictures-loading');
-          break;
-        case ReadyState.DONE:
-        default:
-          if (xhr.status === 200) {
-            var data = loadedXhr.response;
-            picturesContainer.classList.remove('pictures-loading');
-            callback(JSON.parse(data));
-          }
-
-          if (xhr.status >= 400) {
-            showDataFailure();
-          }
-          break;
-      }
-    };
-
-    xhr.ontimeout = function() {
-      showDataFailure();
-    };
+    photosContainer.appendChild(photosFragment);
   }
 
   //Управление блоком фильтров
-  function filterPictures(picturesData, filterValue) {
-    var filteredPictures = picturesData.slice(0);
+  function filterPictures(filterValue) {
+    var filteredPictures = initiallyLoaded.slice(0);
     switch (filterValue) {
       case 'new':
-        filteredPictures = filteredPictures.sort(function(a, b) {
+        filteredPictures.sort(function(a, b) {
           if (a.date < b.date) {
             return 1;
           }
@@ -112,7 +129,7 @@
         });
         break;
       case 'discussed':
-        filteredPictures = filteredPictures.sort(function(a, b) {
+        filteredPictures.sort(function(a, b) {
           return b.comments - a.comments;
         });
         break;
@@ -121,57 +138,69 @@
         break;
     }
 
-    localStorage.setItem('filterValue', filterValue);
+    photosCollection.reset(filteredPictures);
+    localStorage.setItem('filterName', filterValue);
     return filteredPictures;
   }
 
-  //Обработка активного фильтра
+  /**
+   * Устанавливает фильтр фотографий
+   * @param {string} filterValue
+   */
   function setActiveFilter(filterValue) {
     currentPage = 0;
-    currentPictures = filterPictures(pictures, filterValue);
-    renderPictures(currentPictures, currentPage, true);
-
-    var pictureUrls = currentPictures.map(function(photo) {
-      return photo.url;
-    });
-
-    gallery.setPhotos(pictureUrls);
+    filterPictures(filterValue);
+    renderPictures(currentPage++, true);
     loadMorePages();
   }
 
-  //Проверка на возможность загрузки следующей страницы
+  /**
+   * Проверка на возможность загрузки следующей страниц
+   */
   function checkNextPage() {
     if (isAtTheBottom() && isNextPageAvailable()) {
       window.dispatchEvent(new CustomEvent('loadneeded'));
     }
   }
 
-  //Проверка на доступность следующей страницы
+  /**
+   * Проверка доступности следующей страницы для отрисовки
+   * @return {boolean}
+   */
   function isNextPageAvailable() {
-    return currentPage < Math.ceil(pictures.length / PAGE_SIZE);
+    return currentPage < Math.ceil(photosCollection.length / PAGE_SIZE);
   }
 
-  //Проверка нахождения внизу страницы
+  /**
+   * Проверка нахождения внизу страницы
+   * @return {boolean}
+   */
   function isAtTheBottom() {
     var paddingBottom = 100;
-    return picturesContainer.getBoundingClientRect().bottom - paddingBottom <= window.innerHeight;
+    return photosContainer.getBoundingClientRect().bottom - paddingBottom <= window.innerHeight;
   }
 
-  //Проверка на возможность загрузить дополнительные страницы при первой загрузке
+  /**
+   * Проверка на возможность загрузить дополнительные страницы при первой загрузке
+   */
   function loadMorePages() {
     if (!(document.body.offsetHeight === document.body.scrollHeight) && isNextPageAvailable()) {
-      renderPictures(currentPictures, currentPage++, false);
+      renderPictures(currentPage++, false);
     }
   }
 
-  //Проверка на возможность загрузить страницы при изменении размера окна
+  /**
+   * Проверка на возможность загрузить страницы при изменении размера окна
+   */
   function initWindowResize() {
     window.addEventListener('resize', function() {
       loadMorePages();
     });
   }
 
-  //Подгрузка новых изображение при прокрутке страницы
+  /**
+   * Подгрузка новых изображение при прокрутке страницы
+   */
   function initScroll() {
     var someTimeout;
     window.addEventListener('scroll', function() {
@@ -180,11 +209,13 @@
     });
 
     window.addEventListener('loadneeded', function() {
-      renderPictures(currentPictures, currentPage++, false);
+      renderPictures(currentPage++, false);
     });
   }
 
-  //Инициализация фильтров
+  /**
+   * Обработчик события клика по фильтру
+   */
   function initFilters() {
     filtersForm.addEventListener('click', function(evt) {
       var clickedFilter = evt.target;
@@ -192,29 +223,25 @@
     });
   }
 
-  //Инициалицация галереи
-  function initGallery() {
-    if (!gallery) {
-      gallery = new Gallery();
-      window.addEventListener('galleryclick', function(evt) {
-        gallery.setCurrentPhotoByUrl(evt.detail.photoUrl);
-        gallery.show();
-      });
-    }
-  }
+  photosCollection.fetch({timeout: REQUEST_FAILURE_TIMEOUT}).success(function(loaded, state, jqXHR) {
+    initiallyLoaded = jqXHR.responseJSON;
+    initFilters();
+    initScroll();
+    initWindowResize();
 
-  initFilters();
-  initScroll();
-  initGallery();
-  initWindowResize();
-
-  loadPictures(function(loadedPictures) {
-    pictures = loadedPictures;
     var activeFilter = localStorage.getItem('filterValue') || 'popular';
     var currentFilter = document.getElementById('filter-' + activeFilter);
     setActiveFilter(activeFilter);
     if (currentFilter !== null) {
       currentFilter.setAttribute('checked', 'checked');
     }
+  }).fail(function() {
+    showDataFailure();
   });
+
+  /**
+   * Отображение блока с фильтрами
+   */
+  filtersForm.classList.remove('hidden');
+
 })();

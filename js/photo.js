@@ -2,7 +2,7 @@
 
 (function() {
   var REQUEST_FAILURE_TIMEOUT = 10000;
-  var picturesTemplate = document.querySelector('.picture-template');
+  var picturesTemplate = document.getElementById('picture-template');
 
   var Photo = function(data) {
     this._data = data;
