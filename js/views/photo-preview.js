@@ -43,6 +43,13 @@
       this._galleryElement.addEventListener('load', this._onPhotoLoad);
       this.el.querySelector('.likes-count').innerHTML = this.model.get('likes');
       this.el.querySelector('.comments-count').innerHTML = this.model.get('comments');
+
+      if (this.model.get('liked') === true) {
+        this.el.querySelector('.likes-count').classList.add('likes-count-liked');
+      } else {
+        this.el.querySelector('.likes-count').classList.remove('likes-count-liked');
+      }
+
       return this;
     },
 
