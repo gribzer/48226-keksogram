@@ -42,6 +42,7 @@
     this._likesToggle = this._element.querySelector('.likes-count');
 
     this._currentPhoto = -1;
+    this._currentModel = this._photos.at(this._currentPhoto);
 
     this._onCloseClick = this._onCloseClick.bind(this);
     this._onPhotoClick = this._onPhotoClick.bind(this);
@@ -64,7 +65,7 @@
    */
   Gallery.prototype._showCurrentPhoto = function() {
     var galleryElement = new GalleryPicture({
-      model: this._photos.at(this._currentPhoto)
+      model: this._currentModel
     });
     galleryElement.render();
     this._element.querySelector('.likes-count').innerHTML = galleryElement.model.get('likes');
@@ -141,7 +142,7 @@
    */
   Gallery.prototype._onClickLike = function(evt) {
     evt.stopPropagation();
-    this.model.likeToggle();
+    this._currentModel.likeToggle();
   },
 
   /**
