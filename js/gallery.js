@@ -38,15 +38,12 @@
 
     this._element = document.querySelector('.gallery-overlay');
     this._closeButton = this._element.querySelector('.gallery-overlay-close');
-    this._pictureElement = this._element.querySelector('.gallery-overlay-preview');
-    this._likesToggle = this._element.querySelector('.likes-count');
+    this._imageElement = this._element.querySelector('.gallery-overlay-image');
 
     this._currentPhoto = -1;
-    this._currentModel = this._photos.at(this._currentPhoto);
 
     this._onCloseClick = this._onCloseClick.bind(this);
     this._onPhotoClick = this._onPhotoClick.bind(this);
-    this._onClickLike = this._onClickLike.bind(this);
     this._onDocumentKeyDown = this._onDocumentKeyDown.bind(this);
   };
 
@@ -64,14 +61,14 @@
    * @private
    */
   Gallery.prototype._showCurrentPhoto = function() {
-    var galleryElement = new GalleryPicture({
-      model: this._currentModel
+    this._currentModel = this._photos.at(this._currentPhoto);
+
+    this._galleryView = new GalleryPicture({
+      model: this._currentModel,
+      el: document.querySelector('.gallery-overlay-preview')
     });
-    galleryElement.render();
-    this._element.querySelector('.likes-count').innerHTML = galleryElement.model.get('likes');
-    this._element.querySelector('.comments-count').innerHTML = galleryElement.model.get('comments');
-    var currentPicture = this._pictureElement.querySelector('img');
-    currentPicture.parentNode.replaceChild(galleryElement.el, currentPicture);
+
+    this._galleryView.render();
   };
 
   /**
@@ -99,8 +96,7 @@
   Gallery.prototype.show = function() {
     this._element.classList.remove('invisible');
     this._closeButton.addEventListener('click', this._onCloseClick);
-    this._pictureElement.addEventListener('click', this._onPhotoClick);
-    this._likesToggle.addEventListener('click', this._onClickLike);
+    this._imageElement.addEventListener('click', this._onPhotoClick);
     document.body.addEventListener('keydown', this._onDocumentKeyDown);
   };
 
@@ -110,8 +106,7 @@
   Gallery.prototype.hide = function() {
     this._element.classList.add('invisible');
     this._closeButton.removeEventListener('click', this._onCloseClick);
-    this._pictureElement.removeEventListener('click', this._onPhotoClick);
-    this._likesToggle.removeEventListener('click', this._onClickLike);
+    this._imageElement.removeEventListener('click', this._onPhotoClick);
     document.body.removeEventListener('keydown', this._onDocumentKeyDown);
   };
 
@@ -134,16 +129,6 @@
         break;
     }
   };
-
-  /**
-   * При нажатие на клик вызывается обработка количетва "лайков"
-   * @param {Event} evt
-   * @private
-   */
-  Gallery.prototype._onClickLike = function(evt) {
-    evt.stopPropagation();
-    this._currentModel.likeToggle();
-  },
 
   /**
    * Обработчик события клика по текущецй фотографии. Вызывает метод setCurrentPhoto.

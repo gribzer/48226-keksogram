@@ -15,25 +15,53 @@
    * @param (Object) options
    */
   var GalleryPicture = Backbone.View.extend({
-    tagName: 'img',
-    className: 'gallery-overlay-image',
-
     initialize: function() {
-      this._onClick = this._onClick.bind(this);
-      this._onPhotoFail = this._onPhotoFail.bind(this);
+      this._onPhotoLoadError = this._onPhotoLoadError.bind(this);
+      this._onPhotoLoad = this._onPhotoLoad.bind(this);
+      this._onPhotoLoadTimeOut = setTimeout(this._onPhotoLoadError, REQUEST_FAILURE_TIMEOUT);
+
+      this.listenTo(this.model, 'change', this.render);
     },
+
+    /**
+     * Маппинг событий происходящих на элементе на названия методов обработчиков
+     * событий.
+     * @type {Object.<string, string>}
+     */
+    events: {
+      'click .gallery-overlay-controls-like': '_onClickLike'
+    },
+
     /**
      * Отрисовка фото в галерее
      * @override
      */
     render: function() {
-      this.el.src = this.model.get('url');
+      this._galleryElement = this.el.querySelector('.gallery-overlay-image');
+      this._galleryElement.src = this.model.get('url');
+      this._galleryElement.addEventListener('error', this._onPhotoLoadError);
+      this._galleryElement.addEventListener('load', this._onPhotoLoad);
+      this.el.querySelector('.likes-count').innerHTML = this.model.get('likes');
+      this.el.querySelector('.comments-count').innerHTML = this.model.get('comments');
+      return this;
+    },
 
-      this._imageLoadTimeout = setTimeout(function() {
-        this.el.classList.add('picture-big-load-failure');
-      }.bind(this), REQUEST_FAILURE_TIMEOUT);
+    /**
+     * Уничтожаем view
+     */
+    destroy: function() {
+      this.stopListening();
+      this.undelegateEvents();
+    },
 
-      this.el.addEventListener('error', this._onPhotoFail);
+    /**
+     * При нажатие на клик вызывается обработка количетва "лайков"
+     * @param {Event} evt
+     * @private
+     */
+    _onClickLike: function(evt) {
+      evt.stopPropagation();
+      this.model.likeToggle();
     },
 
     /**
@@ -43,7 +71,6 @@
      */
     _onClick: function(evt) {
       evt.preventDefault();
-      this.likeSwitcher();
       this.render();
     },
 
@@ -51,11 +78,32 @@
      * @param {Event} evt
      * @private
      */
-    _onPhotoFail: function(evt) {
-      this.el.src = '';
-      this.el.classList.add('picture-big-load-failure');
-      this.el.removeEventListener('error', this._onPhotoFail);
-      clearTimeout(this._photoLoadTimeout);
+    _onPhotoLoadError: function(evt) {
+      clearTimeout(this._onPhotoLoadTimeOut);
+      this._galleryElement.src = '';
+      this._galleryElement.classList.add('picture-big-load-failure');
+      this._cleanupImageListeners(evt.target);
+    },
+
+    /**
+     * @param {Event} evt
+     * @private
+     * @private
+     */
+    _onPhotoLoad: function(evt) {
+      clearTimeout(this._onPhotoLoadTimeOut);
+      this.el.querySelector('.gallery-overlay-image').classList.remove('picture-big-load-failure');
+      this._cleanupImageListeners(evt.target);
+    },
+
+    /**
+     * Удаление обработчиков событий
+     * @param {Image} image
+     * @private
+     */
+    _cleanupImageListeners: function(image) {
+      image.removeEventListener('load', this._onPhotoLoad);
+      image.removeEventListener('error', this._onPhotoLoadError);
     }
   });
 

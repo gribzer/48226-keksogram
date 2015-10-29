@@ -314,7 +314,6 @@ input[type=radio]:checked + .upload-filter-label {
 }
 
 .picture-big-load-failure {
-  display: block;
   background: #ccc url('../img/icon-cross.png') no-repeat center;
 }
 
