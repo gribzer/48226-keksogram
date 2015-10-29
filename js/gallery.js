@@ -1,4 +1,4 @@
-/* global GalleryPicture: true PhotoModel: true Backbone: true */
+/* global GalleryPicture: true Backbone: true */
 
 'use strict';
 
