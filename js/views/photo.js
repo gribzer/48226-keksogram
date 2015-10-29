@@ -62,6 +62,16 @@
     },
 
     /**
+     * Обработчик клика по лайку
+     * @param {Event} evt
+     * @private
+     */
+    _onClickLike: function(evt) {
+      evt.preventDefault();
+      this.model.likeToggle();
+    },
+
+    /**
      * @param {Event} evt
      * @private
      */

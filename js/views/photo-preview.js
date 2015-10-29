@@ -4,6 +4,12 @@
 
 (function() {
   /**
+   * @const
+   * @type {Number}
+   */
+  var REQUEST_FAILURE_TIMEOUT = 10000;
+
+  /**
    * @constructor
    * @param (Object) attributes
    * @param (Object) options
@@ -14,6 +20,18 @@
 
     initialize: function() {
       this._onClick = this._onClick.bind(this);
+      this._onPhotoFail = this._onPhotoFail.bind(this);
+
+      this.listenTo(this.model, 'change', this.render);
+    },
+
+    /**
+     * Маппинг событий происходящих на элементе на названия методов обработчиков
+     * событий.
+     * @type {Object.<string, string>}
+     */
+    events: {
+      'click .gallery-overlay-controls-like': '_onClickLike'
     },
 
     /**
@@ -22,23 +40,22 @@
      */
     render: function() {
       this.el.src = this.model.get('url');
-    },
 
-    controlsRender: function() {
-      this.el.querySelector('.likes-count').textContent = this.model.get('likes');
-      this.el.querySelector('.comments-count').textContent = this.model.get('comments');
+      this._imageLoadTimeout = setTimeout(function() {
+        this.el.classList.add('picture-big-load-failure');
+      }.bind(this), REQUEST_FAILURE_TIMEOUT);
+
+      this.el.addEventListener('error', this._onPhotoFail);
     },
 
     /**
-     * Добавление и удаление лайка при клике на фото галереи
-     * @override
+     * При нажатие на клик вызывается обработка количетва "лайков"
+     * @param {Event} evt
+     * @private
      */
-    likeSwitcher: function() {
-      if (this.model.get('liked')) {
-        this.model.dislike();
-      } else {
-        this.model.like();
-      }
+    _onClickLike: function(evt) {
+      evt.stopPropagation();
+      this.model.likeToggle();
     },
     /**
      * Обработчик клика по фотографии в галерее
@@ -49,7 +66,17 @@
       evt.preventDefault();
       this.likeSwitcher();
       this.render();
-      this.controlsRender();
+    },
+
+    /**
+     * @param {Event} evt
+     * @private
+     */
+    _onPhotoFail: function(evt) {
+      this.el.src = '';
+      this.el.classList.add('picture-big-load-failure');
+      this.el.removeEventListener('error', this._onPhotoFail);
+      clearTimeout(this._photoLoadTimeout);
     }
   });
 

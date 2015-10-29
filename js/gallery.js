@@ -1,4 +1,4 @@
-/* global GalleryPicture: true PhotoModel: true Backbone: true */
+/* global GalleryPicture: true Backbone: true */
 
 'use strict';
 
@@ -61,8 +61,12 @@
    * @private
    */
   Gallery.prototype._showCurrentPhoto = function() {
-    var galleryElement = new GalleryPicture({model: this._photos.at(this._currentPhoto)});
+    var galleryElement = new GalleryPicture({
+      model: this._photos.at(this._currentPhoto)
+    });
     galleryElement.render();
+    this._element.querySelector('.likes-count').innerHTML = galleryElement.model.get('likes');
+    this._element.querySelector('.comments-count').innerHTML = galleryElement.model.get('comments');
     var currentPicture = this._pictureElement.querySelector('img');
     currentPicture.parentNode.replaceChild(galleryElement.el, currentPicture);
   };
@@ -127,7 +131,7 @@
   };
 
   /**
-   * Обработчик события клика по текущецй фотографии. Вызывает метод showPhoto.
+   * Обработчик события клика по текущецй фотографии. Вызывает метод setCurrentPhoto.
    * @param {Event} evt
    * @private
    */

@@ -9,19 +9,31 @@
    */
   var PhotoModel = Backbone.Model.extend({
     initialize: function() {
-      this.set('liked', false);
+      this.likeToggle = this.likeToggle.bind(this);
     },
 
-    like: function() {
-      this.set('liked', true);
-      var likes = this.get('likes');
-      this.set('likes', ++likes);
+    /**
+     * Значение лайка по умолчанию
+     * @type {Boolean}
+     */
+    defaults: {
+      liked: false
     },
 
-    dislike: function() {
-      this.set('liked', false);
-      var likes = this.get('likes');
-      this.set('likes', --likes);
+    /**
+     * Обработчик количества лайков при нажатии
+     */
+    likeToggle: function() {
+      var likesCount = this.get('likes');
+      if (!this.get('liked')) {
+        likesCount++;
+      } else {
+        likesCount--;
+      }
+      this.set({
+        likes: likesCount,
+        liked: !this.get('liked')
+      });
     }
   });
 

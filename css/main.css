@@ -313,6 +313,11 @@ input[type=radio]:checked + .upload-filter-label {
   width: 182px;
 }
 
+.picture-big-load-failure {
+  display: block;
+  background: #ccc url('../img/icon-cross.png') no-repeat center;
+}
+
 .picture-stats {
   background: rgba(0, 0, 0, 0.3);
   border-radius: 2px;
