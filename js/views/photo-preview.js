@@ -22,20 +22,18 @@
      */
     render: function() {
       this.el.src = this.model.get('url');
-      this.controlsRender();
     },
 
     controlsRender: function() {
-      document.querySelector('.likes-count').innerText = this.model.get('likes');
-      document.querySelector('.comments-count').innerText = this.model.get('comments');
+      this.el.querySelector('.likes-count').textContent = this.model.get('likes');
+      this.el.querySelector('.comments-count').textContent = this.model.get('comments');
     },
 
     /**
      * Добавление и удаление лайка при клике на фото галереи
      * @override
      */
-    likeSwitcher: function(evt) {
-      evt.stopPropagation()
+    likeSwitcher: function() {
       if (this.model.get('liked')) {
         this.model.dislike();
       } else {
@@ -51,6 +49,7 @@
       evt.preventDefault();
       this.likeSwitcher();
       this.render();
+      this.controlsRender();
     }
   });
 

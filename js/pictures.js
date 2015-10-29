@@ -133,8 +133,10 @@
           return b.comments - a.comments;
         });
         break;
-
       default:
+        filteredPictures.sort(function(a, b) {
+          return b.likes - a.likes;
+        });
         break;
     }
 
