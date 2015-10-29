@@ -14,7 +14,7 @@
 
     /**
      * Значение лайка по умолчанию
-     * @type {Boolean}
+     * @type {boolean}
      */
     defaults: {
       liked: false

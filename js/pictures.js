@@ -104,14 +104,18 @@
       view.on('galleryclick', function() {
         gallery.setPhotos(photosCollection);
         gallery.show();
-        gallery.setCurrentPhoto(0);
+        gallery.setCurrentPhoto(photosCollection.indexOf(model));
       });
     });
 
     photosContainer.appendChild(photosFragment);
   }
 
-  //Управление блоком фильтров
+  /**
+   * Управление блоком фильтров
+   * @param  {string} filterValue
+   * @return {boolean}
+   */
   function filterPictures(filterValue) {
     var filteredPictures = initiallyLoaded.slice(0);
     switch (filterValue) {
