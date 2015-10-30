@@ -11,7 +11,7 @@ define([
   'logo-background',
   'upload-form',
   'filter-form'
-], function(Gallery, PhotosCollection, PhotoView) {
+], function(PhotoView, PhotosCollection, Gallery) {
   var filtersForm = document.querySelector('.filters');
 
   /**
