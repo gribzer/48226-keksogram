@@ -1,8 +1,6 @@
-/* global Backbone: true */
-
 'use strict';
 
-(function() {
+define(function() {
   /**
    * @const
    * @type {Number}
@@ -114,5 +112,5 @@
     }
   });
 
-  window.GalleryPicture = GalleryPicture;
-})();
+  return GalleryPicture;
+});

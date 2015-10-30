@@ -1,8 +1,8 @@
-/* global GalleryPicture: true Backbone: true */
-
 'use strict';
 
-(function() {
+define([
+  'views/photo-preview'
+], function(GalleryPicture) {
   /**
    * Список констант кодов нажатых клавиш для обработки
    * клавиатурных событий.
@@ -149,5 +149,5 @@
     this.hide();
   };
 
-  window.Gallery = Gallery;
-})();
+  return Gallery;
+});

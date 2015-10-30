@@ -1,8 +1,6 @@
-/* global Backbone: true */
-
 'use strict';
 
-(function() {
+define(function() {
   /**
    * @constructor
    * @extends {Backbone.Model}
@@ -37,5 +35,5 @@
     }
   });
 
-  window.PhotoModel = PhotoModel;
-})();
+  return PhotoModel;
+});
