@@ -46,7 +46,7 @@ define(function() {
     destroy: function() {
       this.stopListening();
       this.undelegateEvents();
-    },
+    }
   });
 
   return GalleryVideo;

@@ -73,7 +73,7 @@ define([
       this._galleryView = new GalleryPicture({
         model: this._currentModel,
         el: document.querySelector('.gallery-overlay-preview')
-      });;
+      });
     }
 
     this._galleryView.render();
