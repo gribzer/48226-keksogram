@@ -8,9 +8,6 @@ define([
   'views/photo',
   'models/photos',
   'gallery',
-  'logo-background',
-  'upload-form',
-  'filter-form'
 ], function(PhotoView, PhotosCollection, Gallery) {
   var filtersForm = document.querySelector('.filters');
 
