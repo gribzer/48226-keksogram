@@ -1,6 +1,6 @@
 'use strict';
 
-define(function() {
+(function() {
   /**
    * @constructor
    * @param {FileBuffer}
@@ -330,5 +330,5 @@ define(function() {
   };
 
 
-  return Resizer;
-});
+  window.Resizer = Resizer;
+})();

@@ -1,6 +1,6 @@
 'use strict';
 
-define(function() {
+(function() {
   var uploadForm = document.forms['upload-select-image'];
   var resizeForm = document.forms['upload-resize'];
   var filterForm = document.forms['upload-filter'];
@@ -53,4 +53,4 @@ define(function() {
   };
 
   setFilter();
-});
+})();

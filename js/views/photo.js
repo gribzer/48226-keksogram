@@ -1,6 +1,8 @@
+/* global Backbone: true */
+
 'use strict';
 
-define(function() {
+(function() {
   /**
    * @const
    * @type {Number}
@@ -111,5 +113,5 @@ define(function() {
 
   });
 
-  return PhotoView;
-});
+  window.PhotoView = PhotoView;
+})();

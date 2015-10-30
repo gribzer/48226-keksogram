@@ -1,17 +1,12 @@
+/* global
+     Gallery: true
+     PhotosCollection: true
+     PhotoView: true
+*/
+
 'use strict';
 
-requirejs.config({
-  baseUrl: 'js'
-});
-
-define([
-  'views/photo',
-  'models/photos',
-  'gallery',
-  'logo-background',
-  'upload-form',
-  'filter-form'
-], function(Gallery, PhotosCollection, PhotoView) {
+(function() {
   var filtersForm = document.querySelector('.filters');
 
   /**
@@ -150,6 +145,7 @@ define([
     }
 
     photosCollection.reset(filteredPictures);
+    localStorage.setItem('filterName', filterValue);
     return filteredPictures;
   }
 
@@ -158,10 +154,6 @@ define([
    * @param {string} filterValue
    */
   function setActiveFilter(filterValue) {
-    var currentFilter = document.getElementById('filter-' + filterValue);
-    if (currentFilter !== null) {
-      currentFilter.setAttribute('checked', 'checked');
-    }
     currentPage = 0;
     filterPictures(filterValue);
     renderPictures(currentPage++, true);
@@ -231,33 +223,10 @@ define([
    * Обработчик события клика по фильтру
    */
   function initFilters() {
-    var filtersContainer = document.querySelector('.filters');
-
-    filtersContainer.addEventListener('click', function(evt) {
-      var element = evt.target;
-      if (element.tagName === 'INPUT') {
-        location.hash = 'filters/' + evt.target.value;
-      }
+    filtersForm.addEventListener('click', function(evt) {
+      var clickedFilter = evt.target;
+      setActiveFilter(clickedFilter.value);
     });
-  }
-
-  /**
-   * Обработчик события hashchange у объекта window
-   */
-  window.addEventListener('hashchange', function() {
-    setActiveFilter(parseURL());
-  });
-
-  /**
-   * Обработчик хэша адресной строки
-   * @return {string}
-   */
-  function parseURL() {
-    var filterHash = location.hash.match(/^#filters\/(\S+)$/);
-    if (!filterHash) {
-      return 'popular';
-    }
-    return filterHash[1];
   }
 
   photosCollection.fetch({timeout: REQUEST_FAILURE_TIMEOUT}).success(function(loaded, state, jqXHR) {
@@ -266,7 +235,12 @@ define([
     initScroll();
     initWindowResize();
 
-    setActiveFilter(parseURL());
+    var activeFilter = localStorage.getItem('filterValue') || 'popular';
+    var currentFilter = document.getElementById('filter-' + activeFilter);
+    setActiveFilter(activeFilter);
+    if (currentFilter !== null) {
+      currentFilter.setAttribute('checked', 'checked');
+    }
   }).fail(function() {
     showDataFailure();
   });
@@ -276,4 +250,4 @@ define([
    */
   filtersForm.classList.remove('hidden');
 
-});
+})();
