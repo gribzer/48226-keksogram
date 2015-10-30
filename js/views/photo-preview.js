@@ -8,6 +8,7 @@ define(function() {
   var REQUEST_FAILURE_TIMEOUT = 10000;
 
   /**
+   * Конструктор представления фотографии в галерее
    * @constructor
    * @param (Object) attributes
    * @param (Object) options
@@ -53,6 +54,7 @@ define(function() {
 
     /**
      * Уничтожаем view
+     * @override
      */
     destroy: function() {
       this.stopListening();
@@ -80,6 +82,7 @@ define(function() {
     },
 
     /**
+     * Обработчик ошибки при загрузке фотографии
      * @param {Event} evt
      * @private
      */
@@ -91,6 +94,7 @@ define(function() {
     },
 
     /**
+     * Обработчик загрузки фотографии
      * @param {Event} evt
      * @private
      * @private

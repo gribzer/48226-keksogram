@@ -2,6 +2,7 @@
 
 define(function() {
   /**
+   * Конструктор модели PhotosCollection
    * @constructor
    * @extends {Backbone.Model}
    */
