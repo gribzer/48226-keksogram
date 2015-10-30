@@ -44,9 +44,6 @@ define(function() {
         photoImage.addEventListener('abort', this._onImageFail);
 
         if (this.model.get('preview')) {
-          photoImage.addEventListener('load', this._onImageLoad);
-          photoImage.addEventListener('error', this._onImageFail);
-          photoImage.addEventListener('abort', this._onImageFail);
           photoImage.src = this.model.get('preview');
         }
       }

@@ -4,9 +4,10 @@ define(function() {
   var GalleryVideo = Backbone.View.extend({
     initialize: function() {
       this._onClickLike = this._onClickLike.bind(this);
+      this._likesUpdate = this._likesUpdate.bind(this);
       this._toggleVideo = this._toggleVideo.bind(this);
 
-      this.listenTo(this.model, 'change:liked', this._onClickLike);
+      this.listenTo(this.model, 'change:liked', this._likesUpdate);
     },
     events: {
       'click .gallery-overlay-controls-like': '_onClickLike',
@@ -32,6 +33,17 @@ define(function() {
     _onClickLike: function(evt) {
       evt.stopPropagation();
       this.model.likeToggle();
+    },
+
+    _likesUpdate: function() {
+      if (this.model.get('liked') === true) {
+        this.el.querySelector('.likes-count').classList.add('likes-count-liked');
+      } else {
+        this.el.querySelector('.likes-count').classList.remove('likes-count-liked');
+      }
+
+      this.el.querySelector('.likes-count').innerHTML = this.model.get('likes');
+      this.el.querySelector('.comments-count').innerHTML = this.model.get('comments');
     },
 
     _toggleVideo: function(evt) {
