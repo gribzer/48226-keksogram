@@ -1,3 +1,5 @@
+/* global Resizer: true resizer: true*/
+
 'use strict';
 
 (function() {
@@ -28,6 +30,9 @@
 
     uploadImage(fileElement, function(image) {
       sessionStorage.setItem('uploaded-image', image);
+
+      resizer = new Resizer(image);
+      resizer.setElement(resizeForm);
 
       filterForm.querySelector('.filter-image-preview').src = image;
 

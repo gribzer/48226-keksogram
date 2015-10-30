@@ -19,7 +19,7 @@
       // Размер холста равен размеру загруженного изображения. Это нужно
       // для удобства работы с координатами.
       this._container.width = 582;
-      this._container.height = 507;
+      this._container.height = 569;
 
       /**
        * Предлагаемый размер кадра в виде коэффициента относительно меньшей
@@ -42,6 +42,8 @@
 
       // Отрисовка изначального состояния канваса.
       this.redraw();
+
+      window.dispatchEvent(new CustomEvent('pictureload'));
     }.bind(this);
 
     // Фиксирование контекста обработчиков.
@@ -101,7 +103,11 @@
       this._ctx.strokeStyle = '#FFE753';
       this._ctx.lineWidth = 6;
       this._ctx.setLineDash([15, 10]);
-      this._ctx.strokeRect(-this._resizeConstraint.side / 2, -this._resizeConstraint.side / 2, this._resizeConstraint.side, this._resizeConstraint.side);
+      this._ctx.strokeRect(
+        -this._resizeConstraint.side / 2,
+        -this._resizeConstraint.side / 2,
+        this._resizeConstraint.side,
+        this._resizeConstraint.side);
 
       // Восстановление состояния канваса, которое было до вызова ctx.save
       // и последующего изменения системы координат. Нужно для того, чтобы
@@ -203,6 +209,24 @@
      * @param {number} deltaY
      * @param {number} deltaSide
      */
+
+    /**
+     * Возвращает ширину картинки
+     * @returns {number}
+     */
+    getWidth: function() {
+      return this._container.width;
+    },
+
+    /**
+     * Возвращает длину картинки
+     * @returns {number}
+     */
+    getHeight: function() {
+      return this._container.height;
+    },
+
+
     moveConstraint: function(deltaX, deltaY, deltaSide) {
       this.setConstraint(
           this._resizeConstraint.x + (deltaX || 0),
