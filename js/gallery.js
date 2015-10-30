@@ -1,8 +1,9 @@
 'use strict';
 
 define([
-  'views/photo-preview'
-], function(GalleryPicture) {
+  'views/photo-preview',
+  'views/video-preview'
+], function(GalleryPicture, GalleryVideo) {
   /**
    * Список констант кодов нажатых клавиш для обработки
    * клавиатурных событий.
@@ -63,10 +64,17 @@ define([
   Gallery.prototype._showCurrentPhoto = function() {
     this._currentModel = this._photos.at(this._currentPhoto);
 
-    this._galleryView = new GalleryPicture({
-      model: this._currentModel,
-      el: document.querySelector('.gallery-overlay-preview')
-    });
+    if (this._currentModel.get('preview')) {
+      this._galleryView = new GalleryVideo({
+        model: this._currentModel,
+        el: document.querySelector('.gallery-overlay-preview')
+      });
+    } else {
+      this._galleryView = new GalleryPicture({
+        model: this._currentModel,
+        el: document.querySelector('.gallery-overlay-preview')
+      });;
+    }
 
     this._galleryView.render();
   };
