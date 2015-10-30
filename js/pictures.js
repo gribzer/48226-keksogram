@@ -1,12 +1,17 @@
-/* global
-     Gallery: true
-     PhotosCollection: true
-     PhotoView: true
-*/
-
 'use strict';
 
-(function() {
+requirejs.config({
+  baseUrl: 'js'
+});
+
+define([
+  'views/photo',
+  'models/photos',
+  'gallery',
+  'logo-background',
+  'upload-form',
+  'filter-form'
+], function(Gallery, PhotosCollection, PhotoView) {
   var filtersForm = document.querySelector('.filters');
 
   /**
@@ -145,7 +150,6 @@
     }
 
     photosCollection.reset(filteredPictures);
-    localStorage.setItem('filterName', filterValue);
     return filteredPictures;
   }
 
@@ -154,6 +158,10 @@
    * @param {string} filterValue
    */
   function setActiveFilter(filterValue) {
+    var currentFilter = document.getElementById('filter-' + filterValue);
+    if (currentFilter !== null) {
+      currentFilter.setAttribute('checked', 'checked');
+    }
     currentPage = 0;
     filterPictures(filterValue);
     renderPictures(currentPage++, true);
@@ -223,10 +231,33 @@
    * Обработчик события клика по фильтру
    */
   function initFilters() {
-    filtersForm.addEventListener('click', function(evt) {
-      var clickedFilter = evt.target;
-      setActiveFilter(clickedFilter.value);
+    var filtersContainer = document.querySelector('.filters');
+
+    filtersContainer.addEventListener('click', function(evt) {
+      var element = evt.target;
+      if (element.tagName === 'INPUT') {
+        location.hash = 'filters/' + evt.target.value;
+      }
     });
+  }
+
+  /**
+   * Обработчик события hashchange у объекта window
+   */
+  window.addEventListener('hashchange', function() {
+    setActiveFilter(parseURL());
+  });
+
+  /**
+   * Обработчик хэша адресной строки
+   * @return {string}
+   */
+  function parseURL() {
+    var filterHash = location.hash.match(/^#filters\/(\S+)$/);
+    if (!filterHash) {
+      return 'popular';
+    }
+    return filterHash[1];
   }
 
   photosCollection.fetch({timeout: REQUEST_FAILURE_TIMEOUT}).success(function(loaded, state, jqXHR) {
@@ -235,12 +266,7 @@
     initScroll();
     initWindowResize();
 
-    var activeFilter = localStorage.getItem('filterValue') || 'popular';
-    var currentFilter = document.getElementById('filter-' + activeFilter);
-    setActiveFilter(activeFilter);
-    if (currentFilter !== null) {
-      currentFilter.setAttribute('checked', 'checked');
-    }
+    setActiveFilter(parseURL());
   }).fail(function() {
     showDataFailure();
   });
@@ -250,4 +276,4 @@
    */
   filtersForm.classList.remove('hidden');
 
-})();
+});
