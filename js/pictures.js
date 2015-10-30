@@ -1,13 +1,9 @@
 'use strict';
 
-requirejs.config({
-  baseUrl: 'js'
-});
-
 define([
   'views/photo',
   'models/photos',
-  'gallery',
+  'gallery'
 ], function(PhotoView, PhotosCollection, Gallery) {
   var filtersForm = document.querySelector('.filters');
 
